@@ -4,8 +4,8 @@
 
 //TODO:
 //create big bitmap
-//load bitmap
-
+//add coordinates
+//add lines
 
 I32 __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, I32 show_code);
 LRESULT __stdcall WindowMessageHandle(HWND window, UINT message, WPARAM w_param, LPARAM l_param);
@@ -63,7 +63,10 @@ I32 __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_lin
         //Editor
         SelectColor();
         Draw();
-        if(pressed(F2)) ExportToBMP();
+        if(pressed(F5)) ExportBMP(drawboard, 8, 8, "drawboard.bmp");
+        if(pressed(F6)) ImportBMP();
+        if(pressed(F7));
+        
         
         //Render
         HDC device_context = GetDC(window);
@@ -199,8 +202,10 @@ void InputMessageHandling(MSG message, HWND window, POINT mouse_coord){
                 
                 ProcessButtonPress(VK_UP, UP);
                 ProcessButtonPress(VK_F1, F1);
-                ProcessButtonPress(VK_F2, F2);
                 ProcessButtonPress(VK_F3, F3);
+                ProcessButtonPress(VK_F5, F5);
+                ProcessButtonPress(VK_F6, F6);
+                ProcessButtonPress(VK_F7, F7);
                 ProcessButtonPress(VK_ESCAPE, ESCAPE);
             }break;
             case WM_SYSKEYUP:
@@ -209,8 +214,10 @@ void InputMessageHandling(MSG message, HWND window, POINT mouse_coord){
                 
                 ProcessButtonRelease(VK_UP, UP);
                 ProcessButtonRelease(VK_F1, F1);
-                ProcessButtonRelease(VK_F2, F2);
                 ProcessButtonRelease(VK_F3, F3);
+                ProcessButtonRelease(VK_F5, F5);
+                ProcessButtonRelease(VK_F6, F6);
+                ProcessButtonRelease(VK_F7, F7);
                 ProcessButtonRelease(VK_ESCAPE, ESCAPE);
             }break;
             default:{

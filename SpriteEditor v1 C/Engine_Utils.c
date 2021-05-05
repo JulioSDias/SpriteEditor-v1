@@ -102,6 +102,11 @@ enum{
     F1,
     F2,
     F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
     LBUTTON,
     RBUTTON,
     UP,
@@ -140,5 +145,16 @@ TILEINFO colors[16] = {0};
 TILEINFO drawboard[64] = {0};
 TILEINFO display_mouse = {0};
 
+struct{
+    U32 x;
+    U32 y;
+    TILEINFO pixel[64];
+}typedef MAPINFO;
+
+MAPINFO sprite_map[80] = {0};
+
 U32 highlight_x;
 U32 highlight_y;
+
+//U32 x_map = (sprite_map[i].x * SIZE) + (sprite_map[i].pixel[j].x * SIZE/8);
+//U32 y_map = (sprite_map[i].y * SIZE) + (sprite_map[i].pixel[j].y * SIZE/8);
