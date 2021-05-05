@@ -29,12 +29,12 @@ void SetUp(){
         }
     }
     
-    /*for(U8 i = 0; i < 8; i++){
-        for(U8 j = 0; j < 10; j++){
-            sprite_map[i * 10 + j].x = j + 1;
-            sprite_map[i * 10 + j].y = i + 10;
-        }
-    }*/
+    //for(U8 i = 0; i < 8; i++){
+    //for(U8 j = 0; j < 10; j++){
+    //sprite_map[i * 10 + j].x = j + 1;
+    //sprite_map[i * 10 + j].y = i + 10;
+    //}
+    //}
     
     for(U32 z = 0; z < 80; z++){
         for(U32 c = 0; c < 64; c++){
