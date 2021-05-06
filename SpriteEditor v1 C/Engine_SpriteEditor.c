@@ -1,4 +1,6 @@
 void SetUp();
+void SelectColor();
+void SelectMapPixel();
 void Draw();
 void ExportBMP(TILEINFO *bitmap, U32 width, U32 height, U8 *name);
 void ImportBMP();
@@ -20,27 +22,24 @@ void SetUp(){
         }
     }
     
-    for(U32 z = 0; z < 80; z++){
-        for(U32 i = 0; i < 8; i++){
-            for(U32 j = 0; j < 8; j++){
-                sprite_map[z].pixel[i * 8 *j].x = j;
-                sprite_map[z].pixel[i * 8 *j].y = i;
-            }
-        }
-    }
     
-    /*for(U8 i = 0; i < 8; i++){
+    for(U8 i = 0; i < 8; i++){
         for(U8 j = 0; j < 10; j++){
             sprite_map[i * 10 + j].x = j + 1;
             sprite_map[i * 10 + j].y = i + 10;
         }
-    }*/
+    }
+    
     
     for(U32 z = 0; z < 80; z++){
-        for(U32 c = 0; c < 64; c++){
-            printf("%d %d\n", sprite_map[z].pixel[c].x, sprite_map[z].pixel[c].y);
+        for(U32 i = 0; i < 8; i++){
+            for(U32 j = 0; j < 8; j++){
+                sprite_map[z].pixel[i * 8 + j].x = j;
+                sprite_map[z].pixel[i * 8 + j].y = i;
+            }
         }
     }
+    
     
     //TILEINFO PALETTE
     colors[0].color = BLACK;
@@ -93,6 +92,19 @@ void SelectColor(){
     }
 }
 
+void SelectMapPixel(){
+    if(button(LBUTTON).changed == 1 && display_mouse.x > 0 && display_mouse.x < 11 && display_mouse.y > 9 && display_mouse.y < 18){
+        tile_num = (display_mouse.y * 10 + display_mouse.x) - 101;
+        for(U32 i = 0; i < 64; i++){
+            drawboard[i].color = sprite_map[tile_num].pixel[i].color;
+        }
+    }
+    for(U32 i = 0; i < 64; i++){
+        sprite_map[tile_num].pixel[i].color = drawboard[i].color;
+    }
+}
+
+
 void Draw(){
     FillScreen(DARK_GREY);
     
@@ -109,12 +121,12 @@ void Draw(){
     //DRAW SPRITE_MAP
     for(U8 i = 0; i < 80; i++){
         for(U8 j = 0; j < 64; j++){
-            FillRectangle(sprite_map[i].x, sprite_map[i].y, SIZE/8, SIZE/8, sprite_map[i].pixel[j].color);
+            FillRectangle((sprite_map[i].x * SIZE) + (sprite_map[i].pixel[j].x * SIZE/8), (sprite_map[i].y * SIZE) + (sprite_map[i].pixel[j].y * SIZE/8), SIZE/8, SIZE/8, sprite_map[i].pixel[j].color);
         }
     }
     
     //COLOR HIGHLIGHT
-    DrawRectangle(highlight_x * SIZE - 1, highlight_y * SIZE - 1, SIZE + 2, SIZE + 2, 10, display_mouse.color);
+    DrawRectangle(highlight_x * SIZE - 1, highlight_y * SIZE - 1, SIZE + 2, SIZE + 2, 2, display_mouse.color);
     
     if(display_mouse.x > 0 && display_mouse.x < 9  && display_mouse.y > 0 && display_mouse.y < 9){
         if(input.key[LBUTTON].changed == 1){
@@ -122,13 +134,13 @@ void Draw(){
         }
     }
     
+    //HIGHLIGHT MAP SELECTION
+    DrawRectangle(sprite_map[tile_num].x * SIZE, sprite_map[tile_num].y * SIZE, SIZE, SIZE, 1, PURPLE);
+    
 }
 
-void ExportBMP(TILEINFO *bitmap, U32 width, U32 height, U8 *name){
-    printf("Creating BMP\n");
-    
-    U8 header[54] = {0};
-    U32 size = width * height * 4; 
+U8 *CreateHeaderBMP(U32 width, U32 height, U32 size){
+    static U8 header[54] = {0};
     
     header[0] = 'B';
     header[1] = 'M';
@@ -141,6 +153,15 @@ void ExportBMP(TILEINFO *bitmap, U32 width, U32 height, U8 *name){
     header[27] = 0;
     header[28] = 32;
     memset(&header[34], size, 1);
+    
+    return header;
+}
+
+void ExportBMP(TILEINFO *bitmap, U32 width, U32 height, U8 *name){
+    printf("Creating BMP\n");
+    
+    U32 size = width * height * 4; 
+    U8 *header = CreateHeaderBMP(width, height, size);
     
     U8 map[size];
     U8 reversed  = height - 1;
@@ -163,6 +184,10 @@ void ExportBMP(TILEINFO *bitmap, U32 width, U32 height, U8 *name){
     fwrite(map, 1, size, file);
     free(header);
     fclose(file);
+}
+
+void ExportMapBMP(){
+    
 }
 
 void ImportBMP(){

@@ -156,5 +156,4 @@ MAPINFO sprite_map[80] = {0};
 U32 highlight_x;
 U32 highlight_y;
 
-//U32 x_map = (sprite_map[i].x * SIZE) + (sprite_map[i].pixel[j].x * SIZE/8);
-//U32 y_map = (sprite_map[i].y * SIZE) + (sprite_map[i].pixel[j].y * SIZE/8);
+U32 tile_num = 0;

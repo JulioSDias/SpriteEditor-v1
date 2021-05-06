@@ -62,8 +62,9 @@ I32 __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_lin
         
         //Editor
         SelectColor();
+        SelectMapPixel();
         Draw();
-        if(pressed(F5)) ExportBMP(drawboard, 8, 8, "drawboard.bmp");
+        if(pressed(F5)) ExportBMP(drawboard, 8, 8, "mybmp.bmp");
         if(pressed(F6)) ImportBMP();
         if(pressed(F7));
         
@@ -120,7 +121,7 @@ void DebugInfo(HDC device_context){
     TextOut(device_context, 0, 32, debug_string, (I32)strlen(debug_string));
     sprintf(debug_string, "MOUSE COOKED X: %d, Y: %d", display_mouse.x, display_mouse.y);
     TextOut(device_context, 0, 48, debug_string, (I32)strlen(debug_string));
-    sprintf(debug_string, "LEFT B: %d %d", button(LBUTTON).is_down, button(LBUTTON).changed);
+    sprintf(debug_string, "TILE: %d", tile_num);
     TextOut(device_context, 0, 64, debug_string, (I32)strlen(debug_string));
 }
 
