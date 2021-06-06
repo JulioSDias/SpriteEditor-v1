@@ -1,11 +1,12 @@
-#include "Engine_Utils.c"
-#include "Engine_Engine.c"
-#include "Engine_SpriteEditor.c"
+#include "SpriteEditor_Utils.c"
+#include "SpriteEditor_Engine.c"
+#include "SpriteEditor_SpriteEditor.c"
 
 //TODO:
-//create big bitmap
-//add coordinates
-//add lines
+//question mark key
+//TypeKey() is bad
+//Resize Window doesnt work
+
 
 I32 __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_line, I32 show_code);
 LRESULT __stdcall WindowMessageHandle(HWND window, UINT message, WPARAM w_param, LPARAM l_param);
@@ -34,7 +35,7 @@ I32 __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_lin
     window_class.style = CS_HREDRAW|CS_VREDRAW;
     window_class.lpfnWndProc = WindowMessageHandle;
     window_class.hInstance = instance;
-    window_class.lpszClassName = "Engine";
+    window_class.lpszClassName = "SpriteEditor";
     
     RegisterClass(&window_class);
     
@@ -54,20 +55,25 @@ I32 __stdcall WinMain(HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd_lin
     while(running == 1){
         QueryPerformanceCounter(&fps.LINT_start_time);
         FullScreen(window, monitor_info, monitor_size);
-        //Input
+        //Update
         InputMessageHandling(message, window, mouse_coord);
         if(pressed(ESCAPE)) running = 0;
-        if(pressed(F3)) debug = !debug;
         if(pressed(F1)) fullscreen = !fullscreen;
+        if(pressed(F2)) lines = !lines;
+        if(pressed(F3)) debug = !debug;
         
-        //Editor
+        if(save.color == YELLOW) ExportMapBMP(sprite_map);
+        if(load.color == DARK_PURPLE) ImportMapBMP();
         SelectColor();
         SelectMapPixel();
-        Draw();
-        if(pressed(F5)) ExportBMP(drawboard, 8, 8, "mybmp.bmp");
-        if(pressed(F6)) ImportBMP();
-        if(pressed(F7));
-        
+        Save();
+        Load();
+        if(running == 0) Quit();
+        //Draw
+        if(update_flag == 1){
+            Draw();
+            update_flag = 0;
+        }
         
         //Render
         HDC device_context = GetDC(window);
@@ -118,10 +124,8 @@ void DebugInfo(HDC device_context){
     sprintf(debug_string, "RES: %.01f", resolution);
     TextOut(device_context, 0, 32, debug_string, (I32)strlen(debug_string));
     sprintf(debug_string, "MOUSE RAW X: %d, Y: %d", input.mouse.x, input.mouse.y);
-    TextOut(device_context, 0, 32, debug_string, (I32)strlen(debug_string));
-    sprintf(debug_string, "MOUSE COOKED X: %d, Y: %d", display_mouse.x, display_mouse.y);
     TextOut(device_context, 0, 48, debug_string, (I32)strlen(debug_string));
-    sprintf(debug_string, "TILE: %d", tile_num);
+    sprintf(debug_string, "MOUSE COOKED X: %d, Y: %d", display_mouse.x, display_mouse.y);
     TextOut(device_context, 0, 64, debug_string, (I32)strlen(debug_string));
 }
 
@@ -196,6 +200,7 @@ void InputMessageHandling(MSG message, HWND window, POINT mouse_coord){
                 
                 ProcessButtonPress(VK_LBUTTON, LBUTTON);
                 ProcessButtonRelease(VK_LBUTTON, LBUTTON);
+                update_flag = 1;
             }break;
             case WM_SYSKEYDOWN:
             case WM_KEYDOWN:{
@@ -203,11 +208,57 @@ void InputMessageHandling(MSG message, HWND window, POINT mouse_coord){
                 
                 ProcessButtonPress(VK_UP, UP);
                 ProcessButtonPress(VK_F1, F1);
+                ProcessButtonPress(VK_F2, F2);
                 ProcessButtonPress(VK_F3, F3);
                 ProcessButtonPress(VK_F5, F5);
                 ProcessButtonPress(VK_F6, F6);
                 ProcessButtonPress(VK_F7, F7);
                 ProcessButtonPress(VK_ESCAPE, ESCAPE);
+                ProcessButtonPress(VK_BACK, BACKSPACE);
+                ProcessButtonPress(VK_SPACE, SPACEBAR);
+                ProcessButtonPress(VK_SHIFT, SHIFT);
+                ProcessButtonPress(VK_CAPITAL, CAPSLOCK);
+                ProcessButtonPress(VK_OEM_MINUS, SUBTRACT);
+                ProcessButtonPress(VK_OEM_PERIOD, PERIOD);
+                ProcessButtonPress(VK_OEM_COMMA, COMMA);
+                ProcessButtonPress(VK_OEM_8, QUESTION);
+                ProcessButtonPress(0x30, ZERO);
+                ProcessButtonPress(0x31, ONE);
+                ProcessButtonPress(0x32, TWO);
+                ProcessButtonPress(0x33, THREE);
+                ProcessButtonPress(0x34, FOUR);
+                ProcessButtonPress(0x35, FIVE);
+                ProcessButtonPress(0x36, SIX);
+                ProcessButtonPress(0x37, SEVEN);
+                ProcessButtonPress(0x38, EIGHT);
+                ProcessButtonPress(0x39, NINE);
+                ProcessButtonPress(0x41, A);
+                ProcessButtonPress(0X42, B);
+                ProcessButtonPress(0X43, C);
+                ProcessButtonPress(0X44, D);
+                ProcessButtonPress(0X45, E);
+                ProcessButtonPress(0X46, F);
+                ProcessButtonPress(0X47, G);
+                ProcessButtonPress(0X48, H);
+                ProcessButtonPress(0X49, I);
+                ProcessButtonPress(0X4A, J);
+                ProcessButtonPress(0X4B, K);
+                ProcessButtonPress(0X4C, L);
+                ProcessButtonPress(0X4D, M);
+                ProcessButtonPress(0X4E, N);
+                ProcessButtonPress(0X4F, O);
+                ProcessButtonPress(0X50, P);
+                ProcessButtonPress(0X51, Q);
+                ProcessButtonPress(0X52, R);
+                ProcessButtonPress(0X53, S);
+                ProcessButtonPress(0X54, T);
+                ProcessButtonPress(0X55, U);
+                ProcessButtonPress(0X56, V);
+                ProcessButtonPress(0X57, W);
+                ProcessButtonPress(0X58, X);
+                ProcessButtonPress(0X59, Y);
+                ProcessButtonPress(0X5A, Z);
+                update_flag = 1;
             }break;
             case WM_SYSKEYUP:
             case WM_KEYUP:{
@@ -215,11 +266,57 @@ void InputMessageHandling(MSG message, HWND window, POINT mouse_coord){
                 
                 ProcessButtonRelease(VK_UP, UP);
                 ProcessButtonRelease(VK_F1, F1);
+                ProcessButtonRelease(VK_F2, F2);
                 ProcessButtonRelease(VK_F3, F3);
                 ProcessButtonRelease(VK_F5, F5);
                 ProcessButtonRelease(VK_F6, F6);
                 ProcessButtonRelease(VK_F7, F7);
                 ProcessButtonRelease(VK_ESCAPE, ESCAPE);
+                ProcessButtonRelease(VK_BACK, BACKSPACE);
+                ProcessButtonRelease(VK_SPACE, SPACEBAR);
+                ProcessButtonRelease(VK_SHIFT, SHIFT);
+                ProcessButtonRelease(VK_CAPITAL, CAPSLOCK);
+                ProcessButtonRelease(VK_OEM_MINUS, SUBTRACT);
+                ProcessButtonRelease(VK_OEM_PERIOD, PERIOD);
+                ProcessButtonRelease(VK_OEM_COMMA, COMMA);
+                ProcessButtonRelease(VK_OEM_8, QUESTION);
+                ProcessButtonRelease(0x30, ZERO);
+                ProcessButtonRelease(0x31, ONE);
+                ProcessButtonRelease(0x32, TWO);
+                ProcessButtonRelease(0x33, THREE);
+                ProcessButtonRelease(0x34, FOUR);
+                ProcessButtonRelease(0x35, FIVE);
+                ProcessButtonRelease(0x36, SIX);
+                ProcessButtonRelease(0x37, SEVEN);
+                ProcessButtonRelease(0x38, EIGHT);
+                ProcessButtonRelease(0x39, NINE);
+                ProcessButtonRelease(0x41, A);
+                ProcessButtonRelease(0X42, B);
+                ProcessButtonRelease(0X43, C);
+                ProcessButtonRelease(0X44, D);
+                ProcessButtonRelease(0X45, E);
+                ProcessButtonRelease(0X46, F);
+                ProcessButtonRelease(0X47, G);
+                ProcessButtonRelease(0X48, H);
+                ProcessButtonRelease(0X49, I);
+                ProcessButtonRelease(0X4A, J);
+                ProcessButtonRelease(0X4B, K);
+                ProcessButtonRelease(0X4C, L);
+                ProcessButtonRelease(0X4D, M);
+                ProcessButtonRelease(0X4E, N);
+                ProcessButtonRelease(0X4F, O);
+                ProcessButtonRelease(0X50, P);
+                ProcessButtonRelease(0X51, Q);
+                ProcessButtonRelease(0X52, R);
+                ProcessButtonRelease(0X53, S);
+                ProcessButtonRelease(0X54, T);
+                ProcessButtonRelease(0X55, U);
+                ProcessButtonRelease(0X56, V);
+                ProcessButtonRelease(0X57, W);
+                ProcessButtonRelease(0X58, X);
+                ProcessButtonRelease(0X59, Y);
+                ProcessButtonRelease(0X5A, Z);
+                update_flag = 1;
             }break;
             default:{
                 TranslateMessage(&message);

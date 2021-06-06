@@ -1,0 +1,3 @@
+F1 -> FullScreen
+F2 -> Enable/Disable Lines
+F3 -> Debug Info

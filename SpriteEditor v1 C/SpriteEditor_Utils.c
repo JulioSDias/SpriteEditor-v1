@@ -21,9 +21,11 @@
 BOOL debug = 0;
 BOOL fullscreen = 0;
 BOOL running = 1;
+BOOL update_flag = 1;
 U32 black_bar = 0;
 U8 bar_placement = 1;
 F32 resolution = 0;
+
 
 //Color
 
@@ -34,6 +36,7 @@ F32 resolution = 0;
 #define CYAN 0x00FFFF
 #define PURPLE 0xFF00FF
 #define STD_YELLOW 0xFFFF00
+#define STD_DARK_GREY 0x111111
 
 //PICO-8 PALLETE
 #define BLACK 0x000000
@@ -114,7 +117,50 @@ enum{
     LEFT,
     RIGHT,
     ESCAPE,
-    
+    BACKSPACE,
+    SPACEBAR,
+    SHIFT,
+    CAPSLOCK,
+    SUBTRACT,
+    PERIOD,
+    COMMA,
+    QUESTION,
+    ZERO,
+    ONE,
+    TWO,
+    THREE,
+    FOUR,
+    FIVE,
+    SIX,
+    SEVEN,
+    EIGHT,
+    NINE,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P,
+    Q,
+    R,
+    S,
+    T,
+    U,
+    V,
+    W,
+    X,
+    Y,
+    Z,
     BUTTON_COUNT,
 };
 
@@ -126,8 +172,8 @@ struct{
 GAMEINPUT input = {0};
 
 #define pressed(b) input.key[b].is_down == 1 && input.key[b].changed == 1
-#define released(b) ((input.key[b].is_down == 1) && (input.key[b].changed == 1))
-#define hold(b) input.key[b].is_down == 1
+#define released(b) ((input.key[b].is_down == 0) && (input.key[b].changed == 1))
+#define hold(b) input.key[b].is_down == 1 && input.key[b].changed == 0
 #define button(b) input.key[b]
 
 //Math
@@ -141,6 +187,7 @@ struct{
     U32 color;
 }typedef TILEINFO;
 
+TILEINFO eraser = {0};
 TILEINFO colors[16] = {0};
 TILEINFO drawboard[64] = {0};
 TILEINFO display_mouse = {0};
@@ -152,8 +199,38 @@ struct{
 }typedef MAPINFO;
 
 MAPINFO sprite_map[80] = {0};
+MAPINFO *editor_font;
 
 U32 highlight_x;
 U32 highlight_y;
 
-U32 tile_num = 0;
+U32 tile_selected = 0;
+BOOL lines = 0;
+
+//Print
+
+U8 chars[80] = 
+{
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 
+    'U', 'V', 'W', 'X', 'Y', 'Z', ' ', ' ', ' ', ' ',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+    'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+    'u', 'v', 'w', 'x', 'y', 'z', ' ', ' ', ' ', '_',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    '.', ',', ';', ':', '!', '?', '(', ')', '-', '$'
+};
+
+BOOL capslock = 0;
+
+
+//Save Load
+struct{
+    U8 cursor_pos;
+    BOOL cursor_active;
+    U8 arr_name[10];
+    U32 color;
+}typedef FILENAMES;
+
+FILENAMES save = {0};
+FILENAMES load = {0};
